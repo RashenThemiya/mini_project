@@ -1,11 +1,10 @@
-# crop_recommendation/forms.py
 from django import forms
 
 class CropRecommendationForm(forms.Form):
-    nitrogen = forms.FloatField(label="Nitrogen (N)")
-    phosphorus = forms.FloatField(label="Phosphorus (P)")
-    potassium = forms.FloatField(label="Potassium (K)")
-    temperature = forms.FloatField(label="Temperature (°C)")
-    humidity = forms.FloatField(label="Humidity (%)")
-    ph = forms.FloatField(label="pH")
-    rainfall = forms.FloatField(label="Rainfall (mm)")
+    nitrogen = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    phosphorus = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    potassium = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    temperature = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    humidity = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    ph = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    rainfall = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'form-control'}))
