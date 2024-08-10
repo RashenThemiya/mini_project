@@ -9,7 +9,7 @@
         <!-- Form Column -->
         <div class="col-md-6 d-flex align-items-stretch">
             <div class="bg-light p-4 rounded border border-success shadow-sm form-container flex-fill">
-                <h4 class="text-success mb-3">Submit Your Crop Data</h4>
+                <h3 class="text-success mb-4" style="font-size: 1.8rem; font-weight: bold;">Submit Your Crop Data</h3>
                 <form id="cropForm" class="needs-validation" novalidate>
                     {% csrf_token %}
                     {{ form.as_p }}
