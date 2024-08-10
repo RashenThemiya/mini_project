@@ -1,8 +1,57 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
-<h1>Welcome to the Home Page</h1>
+<div class="container mt-5">
+    <!-- Hero Section -->
+    <div class="jumbotron text-center bg-success text-white rounded shadow-lg">
+        <h1 class="display-4">Welcome to the Smart Agricultural Support System</h1>
+        <p class="lead">Empowering Farmers with Advanced Technology and Insights</p>
+        <a href="{% url 'crop_recommendation_index' %}" class="btn btn-light btn-lg mt-3">Explore Our Features</a>
+    </div>
+
+    <!-- About Section -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h2 class="text-success">About the System</h2>
+            <p class="text-muted">The Smart Agricultural Support System is designed to assist farmers by providing AI-driven crop recommendations, market analysis, and disease identification tools. Our system integrates cutting-edge technology to help farmers make informed decisions, optimize crop yields, and increase profitability.</p>
+            <h3 class="text-success">Why This Project?</h3>
+            <p class="text-muted">Agriculture is the backbone of our economy, yet farmers often face challenges like unpredictable weather, pest infestations, and market fluctuations. Our project aims to address these issues by offering real-time support and resources to farmers, ensuring they have the tools they need to succeed.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="{% static 'img/agriculture_welcome.jpg' %}" alt="Agriculture" class="img-fluid rounded shadow-lg">
+        </div>
+    </div>
+
+    <!-- Vision & Aim Section -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card border-success shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title text-success">Our Vision</h3>
+                    <p class="card-text text-muted">To create a sustainable agricultural ecosystem where technology empowers farmers, increases productivity, and promotes economic growth. We envision a future where every farmer has access to the information and tools needed to thrive in an ever-changing environment.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-success shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title text-success">Project Aim</h3>
+                    <p class="card-text text-muted">Our aim is to bridge the gap between technology and agriculture by developing user-friendly tools that provide actionable insights to farmers. By leveraging data analytics and AI, we strive to enhance decision-making processes, reduce risks, and improve overall farm management.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar and Charts Section -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div id="calendar" class="bg-light p-3 rounded shadow-sm"></div>
+        </div>
+        <div class="col-md-6">
+            <div id="agricultureChart" class="bg-light p-3 rounded shadow-sm"></div>
+        </div>
+    </div>
+</div>
+
 {% include 'footer.html' %}
 {% endblock %}
-
-
