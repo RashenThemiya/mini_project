@@ -1,14 +1,31 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
 
 <div class="container mt-5">
-    <h2>Crop Recommendation</h2>
-    <form id="cropForm">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Submit</button>
-    </form>
+    <div class="row">
+        <!-- Form Column -->
+        <div class="col-md-6 d-flex align-items-stretch">
+            <div class="bg-light p-4 rounded border border-success shadow-sm form-container flex-fill">
+                <h4 class="text-success mb-3">Submit Your Crop Data</h4>
+                <form id="cropForm" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-success mt-3">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Instructions Column -->
+        <div class="col-md-6 d-flex align-items-stretch">
+            {% include 'instructions.html' %}
+        </div>
+    </div>
+    
+    {% include 'purchase_equipment.html' %} <!-- Include the new component here -->
+
 </div>
 
 <!-- Include jQuery -->
@@ -18,12 +35,61 @@
     var $j = jQuery.noConflict();
 
     console.log("jQuery version: " + $j.fn.jquery);
+
+    // Form validation function
+    function validateForm() {
+        let isValid = true;
+        $j('#cropForm input, #cropForm select').each(function() {
+            let value = $j(this).val();
+            if (!$j(this).prop('required') && value.trim() === '') {
+                // Skip non-required fields that are empty
+                return;
+            }
+            if (!value || (this.type === 'number' && isNaN(value))) {
+                isValid = false;
+                $j(this).addClass('is-invalid');
+            } else {
+                $j(this).removeClass('is-invalid');
+            }
+        });
+        return isValid;
+    }
+
+    $j(document).ready(function() {
+        $j('#cropForm').on('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            
+            if (validateForm()) {
+                $j.ajax({
+                    url: "{% url 'crop_recommendation_index' %}", // The view handling the AJAX request
+                    method: "POST",
+                    data: $j(this).serialize(), // Serialize the form data
+                    success: function(data) {
+                        // Update the modal content with the recommended crop
+                        $j('#cropRecommendation').text(data.recommended_crop);
+                        // Show the modal
+                        $j('#resultModal').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        alert("An error occurred: " + error); // Error handling
+                    }
+                });
+            } else {
+                alert("Please fill out all required fields with valid values."); // Notify the user
+            }
+        });
+
+        // Optional: Add Bootstrap's custom validation styles
+        $j('#cropForm').on('input change', function() {
+            validateForm();
+        });
+    });
 </script>
 
 <!-- FontAwesome CDN (optional, used for icons) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
-<!-- Bootstrap CSS (for modal) -->
+<!-- Bootstrap CSS (for modal and form) -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 <!-- Modal HTML -->
@@ -46,31 +112,53 @@
     </div>
 </div>
 
-<!-- Pop-up Script -->
-<script>
-    $j(document).ready(function() {
-        $j('#cropForm').on('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-            $j.ajax({
-                url: "{% url 'crop_recommendation_index' %}", // The view handling the AJAX request
-                method: "POST",
-                data: $j(this).serialize(), // Serialize the form data
-                success: function(data) {
-                    // Update the modal content with the recommended crop
-                    $j('#cropRecommendation').text(data.recommended_crop);
-                    // Show the modal
-                    $j('#resultModal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    alert("An error occurred: " + error); // Error handling
-                }
-            });
-        });
-    });
-</script>
-
 <!-- Bootstrap JS (for modal functionality) -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom Styles -->
+<style>
+    @keyframes colorChange {
+        0% { background-color: #d4edda; }
+        25% { background-color: #c3e6cb; }
+        50% { background-color: #b1dfbb; }
+        75% { background-color: #a1d6ab; }
+        100% { background-color: #d4edda; }
+    }
+
+    .form-container {
+        animation: colorChange 10s infinite;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .form-container:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-container h4 {
+        transition: color 0.5s ease;
+    }
+
+    .form-container:hover h4 {
+        color: #155724;
+    }
+
+    .form-container form {
+        transition: opacity 0.3s ease;
+    }
+
+    .form-container:hover form {
+        opacity: 0.9;
+    }
+
+    .is-invalid {
+        border-color: #dc3545;
+    }
+
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+    }
+</style>
 
 {% include 'footer.html' %}
 

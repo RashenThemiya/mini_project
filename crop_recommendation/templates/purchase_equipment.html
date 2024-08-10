@@ -1,0 +1,27 @@
+{% load static %}
+
+<div class="container mt-5 bg-light p-4 rounded shadow-sm">
+    <h3 class="mt-4 text-success">Purchase Equipment</h3>
+    <p class="text-muted">Buy the necessary equipment and tools for accurate measurement from our marketplace:</p>
+    <a href="{% url 'market_place_index' %}" class="btn btn-success mb-4">Visit Our Marketplace</a>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card border-success rounded-3 shadow-sm">
+                <img src="{% static 'img/soil_test_kit.jpg' %}" alt="Soil Test Kit" class="card-img-top img-fluid" style="max-height: 150px; object-fit: cover;">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Soil Test Kit</h5>
+                    <p class="card-text">Essential for measuring soil nutrients accurately.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card border-success rounded-3 shadow-sm">
+                <img src="{% static 'img/thermometer.jpg' %}" alt="Thermometer" class="card-img-top img-fluid" style="max-height: 150px; object-fit: cover;">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Thermometer</h5>
+                    <p class="card-text">Monitor temperature conditions for optimal growth.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
