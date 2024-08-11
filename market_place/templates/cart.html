@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Your Cart</h1>
+    <div class="cart-items">
+        {% if cart_items %}
+            <ul>
+                {% for cart_item in cart_items %}
+                    <li>
+                        <h2>{{ cart_item.item.name }}</h2>
+                        <p>Price: ${{ cart_item.item.price }}</p>
+                        <p>Quantity: {{ cart_item.quantity }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+            <form action="{% url 'place_order' %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Place Order</button>
+            </form>
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
+    </div>
+    {% include 'footer.html' %}
+{% endblock %}
