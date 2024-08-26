@@ -49,12 +49,9 @@
                     {% for address in addresses %}
                         <li class="list-group-item p-3 mb-2 border rounded" style="background-color: #f8f9fa;">
                             <strong class="text-success">{{ address.name }}</strong><br>
-                            {{ address.address_line_1 }}<br>
-                            {% if address.address_line_2 %}
-                                {{ address.address_line_2 }}<br>
-                            {% endif %}
-                            {{ address.city }}, {{ address.district }}<br>
-                            {{ address.postal_code }}<br>
+                            
+                            {{ address.address }}, {{ address.district }}<br>
+    
                             {{ address.country }}<br>
                             <span class="text-muted">Phone:</span> {{ address.phone_number }}
                             
