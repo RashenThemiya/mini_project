@@ -1,25 +1,75 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
-    <h1>Your Cart</h1>
-    <div class="cart-items">
-        {% if cart_items %}
-            <ul>
-                {% for cart_item in cart_items %}
-                    <li>
-                        <h2>{{ cart_item.item.name }}</h2>
-                        <p>Price: ${{ cart_item.item.price }}</p>
-                        <p>Quantity: {{ cart_item.quantity }}</p>
-                    </li>
-                {% endfor %}
-            </ul>
-            <form action="{% url 'place_order' %}" method="post">
-                {% csrf_token %}
-                <button type="submit">Place Order</button>
-            </form>
-        {% else %}
-            <p>Your cart is empty.</p>
-        {% endif %}
+<div class="container">
+    <h1 class="mt-4">Your Cart</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="cart-items">
+                {% if cart_items %}
+                    <ul class="list-group">
+                        {% for cart_item in cart_items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div class="item-image">
+                                    {% if cart_item.item.image %}
+                                        <img src="{{ cart_item.item.image.url }}" alt="{{ cart_item.item.name }}" class="img-thumbnail" style="max-width: 100px;">
+                                    {% else %}
+                                        <img src="{% static 'images/default-item.png' %}" alt="{{ cart_item.item.name }}" class="img-thumbnail" style="max-width: 100px;">
+                                    {% endif %}
+                                </div>
+                                <div class="item-details ml-3">
+                                    <h5>{{ cart_item.item.name }}</h5>
+                                    <p>Price: ${{ cart_item.item.price }}</p>
+                                    <p>Quantity: {{ cart_item.quantity }}</p>
+                                </div>
+                                <div class="item-actions">
+                                    <form action="{% url 'remove_from_cart' cart_item.item.id %}" method="post" class="ml-3">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Remove</button>
+                                    </form>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <form action="{% url 'place_order' %}" method="post" class="mt-4">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-block">Place Order</button>
+                    </form>
+                {% else %}
+                    <p>Your cart is empty.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            {% if addresses %}
+                <h4 class="mt-4 mb-3 text-primary">Shipping Address</h4>
+                <ul class="list-group shadow-sm">
+                    {% for address in addresses %}
+                        <li class="list-group-item p-3 mb-2 border rounded" style="background-color: #f8f9fa;">
+                            <strong class="text-success">{{ address.name }}</strong><br>
+                            {{ address.address_line_1 }}<br>
+                            {% if address.address_line_2 %}
+                                {{ address.address_line_2 }}<br>
+                            {% endif %}
+                            {{ address.city }}, {{ address.district }}<br>
+                            {{ address.postal_code }}<br>
+                            {{ address.country }}<br>
+                            <span class="text-muted">Phone:</span> {{ address.phone_number }}
+                            
+                            <div class="text-end mt-2">
+                                <a href="{% url 'edit_address' address.id %}" class="btn btn-sm btn-outline-success">Edit Address</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="alert alert-warning mt-3">No address found. Please <a href="{% url 'add_address' %}" class="alert-link">add an address</a>.</p>
+            {% endif %}
+        </div>
     </div>
-    {% include 'footer.html' %}
+</div>
+
+{% include 'footer.html' %}
 {% endblock %}

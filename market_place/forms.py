@@ -2,32 +2,27 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser, Profile, Item
 
-class UserRegistrationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
 
+class UserRegistrationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ('email', 'password1', 'password2')
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password1 = cleaned_data.get('password1')
-        password2 = cleaned_data.get('password2')
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords do not match.")
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
-        if commit:
-            user.save()
-        return user
+    def __init__(self, *args, **kwargs):
+        super(UserRegistrationForm, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['user_type']
+        fields = ('user_type',)
 
+    def __init__(self, *args, **kwargs):
+        super(ProfileForm, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
+        
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
@@ -48,3 +43,19 @@ from django import forms
 
 class AddToCartForm(forms.Form):
     quantity = forms.IntegerField(min_value=1, initial=1, label='Quantity')
+
+from django import forms
+from .models import Address  # Assuming you have an Address model
+
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ['name', 'district', 'country', 'phone_number', 'address']
+        widgets = {
+            'address': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Optional: Customize widget attributes or form behavior heres

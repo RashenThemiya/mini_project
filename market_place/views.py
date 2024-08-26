@@ -6,8 +6,16 @@ from .forms import UserRegistrationForm, ProfileForm, ItemForm
 from .models import CustomUser, Profile, Item, Cart, CartItem, Order
 from .forms import AddToCartForm
 def index(request):
-    # Fetch all items by default
-    items = Item.objects.all()
+    if request.user.is_authenticated:
+        if request.user.profile.user_type == 'seller':
+            # Show only the seller's own items
+            items = Item.objects.filter(seller=request.user.profile)
+        else:
+            # Show all items for buyers
+            items = Item.objects.all()
+    else:
+        # Show all items for non-logged-in users
+        items = Item.objects.all()
     
     # Handle search query
     search_query = request.GET.get('search', '')
@@ -139,3 +147,95 @@ def add_item(request):
         form = ItemForm()
     
     return render(request, 'add_item.html', {'form': form})
+
+def edit_item(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    # Handle the form submission and other logic here
+    return render(request, 'edit_item.html', {'item': item})
+
+@login_required
+def delete_item(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+
+    # Ensure the logged-in user is the seller of the item
+    if request.user.profile.user_type == 'seller' and item.seller == request.user.profile:
+        item.delete()
+        messages.success(request, f"{item.name} has been deleted successfully.")
+    else:
+        messages.error(request, "You are not authorized to delete this item.")
+    
+    return redirect('market_place_index')
+
+from django.shortcuts import get_object_or_404, redirect
+from .models import CartItem
+
+def remove_from_cart(request, item_id):
+    cart = get_object_or_404(Cart, user=request.user)
+    try:
+        cart_item = cart.items.through.objects.get(cart=cart, item_id=item_id)
+    except CartItem.DoesNotExist:
+        return HttpResponseBadRequest("Cart item does not exist.")
+
+    cart_item.delete()
+    return redirect('cart')
+
+
+from django.shortcuts import render, redirect
+from .forms import AddressForm
+from .models import Address
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def add_address(request):
+    if request.method == 'POST':
+        form = AddressForm(request.POST)
+        if form.is_valid():
+            address_data = form.cleaned_data
+            user = request.user
+            
+            # Check if an address already exists for this user
+            address, created = Address.objects.update_or_create(
+                user=user,
+                defaults=address_data
+            )
+            
+            if created:
+                message = "Address added successfully."
+            else:
+                message = "Address updated successfully."
+
+            return redirect('cart')  # Redirect to a success page or the cart
+    else:
+        form = AddressForm()
+    
+    return render(request, 'add_address.html', {'form': form})
+
+def cart(request):
+    try:
+        cart = Cart.objects.get(user=request.user)
+        cart_items = cart.cartitem_set.all()  # Use the related name or directly access the CartItem set
+    except Cart.DoesNotExist:
+        cart_items = []
+
+    addresses = Address.objects.filter(user=request.user)
+
+    return render(request, 'cart.html', {
+        'cart_items': cart_items,
+        'addresses': addresses,
+    })
+    
+    
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Address
+from .forms import AddressForm
+
+def edit_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id)
+    if request.method == 'POST':
+        form = AddressForm(request.POST, instance=address)
+        if form.is_valid():
+            form.save()
+            return redirect('cart')
+    else:
+        form = AddressForm(instance=address)
+    return render(request, 'edit_address.html', {'form': form})

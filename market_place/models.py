@@ -1,6 +1,9 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.conf import settings
+import uuid
+from django.utils.deconstruct import deconstructible
+from django.core.files.storage import default_storage
 
 # Custom User Manager
 class CustomUserManager(BaseUserManager):
@@ -43,10 +46,6 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.email
-    
-import uuid
-from django.utils.deconstruct import deconstructible
-from django.core.files.storage import default_storage
 
 @deconstructible
 class UniqueImageName(object):
@@ -55,7 +54,7 @@ class UniqueImageName(object):
         unique_filename = f"{uuid.uuid4()}.{ext}"
         return f"item_images/{unique_filename}"
 
-
+# Item Model
 class Item(models.Model):
     CATEGORY_CHOICES = [
         ('equipment', 'Equipment'),
@@ -70,12 +69,11 @@ class Item(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField()
-    image = models.ImageField(upload_to='item_images/', null=True, blank=True)
+    image = models.ImageField(upload_to=UniqueImageName(), null=True, blank=True)
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES, blank=True, null=True)
 
     def __str__(self):
         return self.name
-
 
 # Cart Model
 class Cart(models.Model):
@@ -102,3 +100,18 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.id} by {self.buyer.user.email}"
+
+# Address Model
+class Address(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    district = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=20)
+    address = models.TextField()
+
+    class Meta:
+        unique_together = ('user', 'name')  # Adjust based on your requirements
+
+    def __str__(self):
+        return f"{self.name} - {self.address}"

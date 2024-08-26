@@ -27,7 +27,7 @@
                     <a href="{% url 'add_item' %}" class="btn btn-success">Add New Item to Sell</a>
                 {% elif user.profile and user.profile.user_type == 'buyer' %}
                     <!-- Show 'View Cart' button if the user is a buyer -->
-                    <a href="{% url 'cart' %}" class="btn btn-success">View Cart</a>
+                    <a href="{% url 'cart' %}" class="btn btn-success mr-2">View Cart</a>
                 {% endif %}
             {% else %}
                 <div class="text-center">
@@ -71,11 +71,20 @@
                                 <div class="mt-auto">
                                     <button class="btn btn-info w-100" data-toggle="modal" data-target="#itemModal{{ item.id }}">View Details</button>
                                     {% if user.is_authenticated %}
-                                        <form action="{% url 'add_to_cart' item.id %}" method="post" class="mt-2">
-                                            {% csrf_token %}
-                                            <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
-                                            <button type="submit" class="btn btn-success w-100">Add to Cart</button>
-                                        </form>
+                                        {% if user.profile.user_type == 'seller' %}
+                                            <!-- Show 'Delete Item' button if the user is a seller -->
+                                            <form action="{% url 'delete_item' item.id %}" method="post" class="mt-2">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger w-100">Delete Item</button>
+                                            </form>
+                                        {% else %}
+                                            <!-- Show 'Add to Cart' button if the user is not a seller -->
+                                            <form action="{% url 'add_to_cart' item.id %}" method="post" class="mt-2">
+                                                {% csrf_token %}
+                                                <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
+                                                <button type="submit" class="btn btn-success w-100">Add to Cart</button>
+                                            </form>
+                                        {% endif %}
                                     {% else %}
                                         <a href="{% url 'login' %}" class="btn btn-success w-100 mt-2">Buy Now</a>
                                     {% endif %}
@@ -105,11 +114,20 @@
                                                 <p>{{ item.description }}</p>
                                                 <p><strong>Price:</strong> LKR {{ item.price }}</p>
                                                 {% if user.is_authenticated %}
-                                                    <form action="{% url 'add_to_cart' item.id %}" method="post">
-                                                        {% csrf_token %}
-                                                        <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
-                                                        <button type="submit" class="btn btn-success w-100">Add to Cart</button>
-                                                    </form>
+                                                    {% if user.profile.user_type == 'seller' %}
+                                                        <!-- Show 'Delete Item' button if the user is a seller -->
+                                                        <form action="{% url 'delete_item' item.id %}" method="post">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-danger w-100">Delete Item</button>
+                                                        </form>
+                                                    {% else %}
+                                                        <!-- Show 'Add to Cart' button if the user is not a seller -->
+                                                        <form action="{% url 'add_to_cart' item.id %}" method="post">
+                                                            {% csrf_token %}
+                                                            <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
+                                                            <button type="submit" class="btn btn-success w-100">Add to Cart</button>
+                                                        </form>
+                                                    {% endif %}
                                                 {% else %}
                                                     <a href="{% url 'login' %}" class="btn btn-success w-100">Buy Now</a>
                                                 {% endif %}
@@ -125,11 +143,10 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <p class="text-center">No items available at the moment.</p>
+                <p class="text-center">No items available.</p>
             {% endif %}
         </div>
     </div>
-    
-       
-{% include 'footer.html' %}   
+{% include 'footer.html' %}
+
 {% endblock %}
