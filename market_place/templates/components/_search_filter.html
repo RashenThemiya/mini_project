@@ -1,0 +1,14 @@
+<div class="search-filter mb-4">
+  <form method="get" action="{% url 'market_place_index' %}" class="form-inline justify-content-center">
+      <input type="text" name="search" value="{{ search_query }}" class="form-control mr-2 mb-2 mb-sm-0" placeholder="Search items..." />
+      <select name="category" class="form-control mr-2 mb-2 mb-sm-0">
+          <option value="">All Categories</option>
+          <option value="equipment" {% if category_filter == 'equipment' %}selected{% endif %}>Equipment</option>
+          <option value="crop" {% if category_filter == 'crop' %}selected{% endif %}>Crop</option>
+          <option value="fertilizer" {% if category_filter == 'fertilizer' %}selected{% endif %}>Fertilizer</option>
+          <option value="pesticides" {% if category_filter == 'pesticides' %}selected{% endif %}>Pesticides</option>
+          <option value="other" {% if category_filter == 'other' %}selected{% endif %}>Other</option>
+      </select>
+      <button type="submit" class="btn btn-dark">Search</button>
+  </form>
+</div>

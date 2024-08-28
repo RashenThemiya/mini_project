@@ -1,152 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <!-- Notice Banner -->
-    {% if not user.is_authenticated %}
-        <div class="alert alert-warning text-center" role="alert">
-            <strong>Notice:</strong> You need to <a href="{% url 'login' %}" class="alert-link">log in</a> to buy items or <a href="{% url 'register' %}" class="alert-link">create an account</a> if you don't have one. 
-        </div>
-    {% endif %}
-
+    {% include 'components/_notice_banner.html' %}
     <div class="container mt-4">
         <h1 class="mb-4 text-center">Welcome to the Marketplace</h1>
-
-        <!-- Dashboard section -->
-        <div class="dashboard mb-4">
-            {% if user.is_authenticated %}
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <p class="mb-0">Hello, {{ user.email }}!</p>
-                    <form action="{% url 'logout' %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-dark">Logout</button>
-                    </form>
-                </div>
-
-                {% if user.profile and user.profile.user_type == 'seller' %}
-                    <!-- Show 'Add Item' button only if the user is a seller -->
-                    <a href="{% url 'add_item' %}" class="btn btn-success">Add New Item to Sell</a>
-                {% elif user.profile and user.profile.user_type == 'buyer' %}
-                    <!-- Show 'View Cart' button if the user is a buyer -->
-                    <a href="{% url 'cart' %}" class="btn btn-success mr-2">View Cart</a>
-                {% endif %}
-            {% else %}
-                <div class="text-center">
-                    <a href="{% url 'login' %}" class="btn btn-secondary mr-2">Login</a>
-                    <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
-                </div>
-            {% endif %}
-        </div>
-
+        {% include 'components/_dashboard.html' %}
         <h2 class="mb-4 text-center">Marketplace Items</h2>
-
-        <!-- Search and Filter Form -->
-        <div class="search-filter mb-4">
-            <form method="get" action="{% url 'market_place_index' %}" class="form-inline justify-content-center">
-                <input type="text" name="search" value="{{ search_query }}" class="form-control mr-2 mb-2 mb-sm-0" placeholder="Search items..." />
-                <select name="category" class="form-control mr-2 mb-2 mb-sm-0">
-                    <option value="">All Categories</option>
-                    <option value="equipment" {% if category_filter == 'equipment' %}selected{% endif %}>Equipment</option>
-                    <option value="crop" {% if category_filter == 'crop' %}selected{% endif %}>Crop</option>
-                    <option value="fertilizer" {% if category_filter == 'fertilizer' %}selected{% endif %}>Fertilizer</option>
-                    <option value="pesticides" {% if category_filter == 'pesticides' %}selected{% endif %}>Pesticides</option>
-                    <option value="other" {% if category_filter == 'other' %}selected{% endif %}>Other</option>
-                </select>
-                <button type="submit" class="btn btn-dark">Search</button>
-            </form>
-        </div>
-
+        {% include 'components/_search_filter.html' %}
         <div class="row">
             {% if items %}
                 {% for item in items %}
-                    <div class="col-md-4 mb-4">
-                        <div class="card border-success shadow-sm" style="height: 100%;">
-                            {% if item.image %}
-                                <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}" style="object-fit: cover; height: 200px;">
-                            {% else %}
-                                <img src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top" alt="{{ item.name }}" style="object-fit: cover; height: 200px;">
-                            {% endif %}
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ item.name }}</h5>
-                                <p class="card-text mb-3">Price: LKR {{ item.price }}</p>
-                                <div class="mt-auto">
-                                    <button class="btn btn-info w-100" data-toggle="modal" data-target="#itemModal{{ item.id }}">View Details</button>
-                                    {% if user.is_authenticated %}
-                                        {% if user.profile.user_type == 'seller' %}
-                                            <!-- Show 'Delete Item' button if the user is a seller -->
-                                            <form action="{% url 'delete_item' item.id %}" method="post" class="mt-2">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger w-100">Delete Item</button>
-                                            </form>
-                                        {% else %}
-                                            <!-- Show 'Add to Cart' button if the user is not a seller -->
-                                            <form action="{% url 'add_to_cart' item.id %}" method="post" class="mt-2">
-                                                {% csrf_token %}
-                                                <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
-                                                <button type="submit" class="btn btn-success w-100">Add to Cart</button>
-                                            </form>
-                                        {% endif %}
-                                    {% else %}
-                                        <a href="{% url 'login' %}" class="btn btn-success w-100 mt-2">Buy Now</a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Item Details Modal -->
-                        <div class="modal fade" id="itemModal{{ item.id }}" tabindex="-1" aria-labelledby="itemModalLabel{{ item.id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="itemModalLabel{{ item.id }}">{{ item.name }}</h5>
-                                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                {% if item.image %}
-                                                    <img src="{{ item.image.url }}" class="img-fluid" alt="{{ item.name }}">
-                                                {% else %}
-                                                    <img src="https://via.placeholder.com/600x400?text=No+Image" class="img-fluid" alt="{{ item.name }}">
-                                                {% endif %}
-                                            </div>
-                                            <div class="col-md-6">
-                                                <h5>Description</h5>
-                                                <p>{{ item.description }}</p>
-                                                <p><strong>Price:</strong> LKR {{ item.price }}</p>
-                                                {% if user.is_authenticated %}
-                                                    {% if user.profile.user_type == 'seller' %}
-                                                        <!-- Show 'Delete Item' button if the user is a seller -->
-                                                        <form action="{% url 'delete_item' item.id %}" method="post">
-                                                            {% csrf_token %}
-                                                            <button type="submit" class="btn btn-danger w-100">Delete Item</button>
-                                                        </form>
-                                                    {% else %}
-                                                        <!-- Show 'Add to Cart' button if the user is not a seller -->
-                                                        <form action="{% url 'add_to_cart' item.id %}" method="post">
-                                                            {% csrf_token %}
-                                                            <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
-                                                            <button type="submit" class="btn btn-success w-100">Add to Cart</button>
-                                                        </form>
-                                                    {% endif %}
-                                                {% else %}
-                                                    <a href="{% url 'login' %}" class="btn btn-success w-100">Buy Now</a>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {% include 'components/_item_card.html' with item=item %}
                 {% endfor %}
             {% else %}
                 <p class="text-center">No items available.</p>
             {% endif %}
         </div>
     </div>
-{% include 'footer.html' %}
-
+    {% include 'footer.html' %}
 {% endblock %}

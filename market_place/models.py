@@ -3,7 +3,7 @@ from django.db import models
 from django.conf import settings
 import uuid
 from django.utils.deconstruct import deconstructible
-from django.core.files.storage import default_storage
+
 
 # Custom User Manager
 class CustomUserManager(BaseUserManager):
@@ -21,6 +21,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
 
+
 # Custom User Model
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -35,6 +36,7 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.email
 
+
 # Profile Model
 class Profile(models.Model):
     USER_TYPES = (
@@ -47,12 +49,14 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.email
 
+
 @deconstructible
 class UniqueImageName(object):
     def __call__(self, instance, filename):
         ext = filename.split('.')[-1]
         unique_filename = f"{uuid.uuid4()}.{ext}"
         return f"item_images/{unique_filename}"
+
 
 # Item Model
 class Item(models.Model):
@@ -75,6 +79,7 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
+
 # Cart Model
 class Cart(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -82,6 +87,7 @@ class Cart(models.Model):
 
     def __str__(self):
         return f"{self.user.email}'s Cart"
+
 
 # CartItem Model
 class CartItem(models.Model):
@@ -92,14 +98,6 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.quantity} of {self.item.name}"
 
-# Order Model
-class Order(models.Model):
-    buyer = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='orders')
-    items = models.ManyToManyField(Item)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Order {self.id} by {self.buyer.user.email}"
 
 # Address Model
 class Address(models.Model):
@@ -115,3 +113,37 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.address}"
+
+
+class Order(models.Model):
+    PAYMENT_METHOD_CHOICES = [
+        ('cod', 'Cash on Delivery'),
+        ('card', 'Card Payment'),
+    ]
+
+    STATUS_CHOICES = [
+        ('processed', 'Processed'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+    ]
+
+    buyer = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='orders')
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='processed')
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_confirmed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Order {self.id} by {self.buyer.user.email} (Status: {self.status})"
+
+
+# OrderItem Model (Tracks items in each order)
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.quantity} of {self.item.name} at {self.price_at_purchase} each"

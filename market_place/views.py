@@ -218,10 +218,14 @@ def cart(request):
         cart_items = []
 
     addresses = Address.objects.filter(user=request.user)
+    
+    # Calculate total cost
+    total_cost = sum(item.item.price * item.quantity for item in cart_items)
 
     return render(request, 'cart.html', {
         'cart_items': cart_items,
         'addresses': addresses,
+        'total_cost': total_cost,  # Pass total cost to the template
     })
     
     
@@ -239,3 +243,113 @@ def edit_address(request, address_id):
     else:
         form = AddressForm(instance=address)
     return render(request, 'edit_address.html', {'form': form})
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils import timezone
+from django.conf import settings
+from django.core.mail import send_mail
+from .models import Cart, CartItem, Order, OrderItem, Profile, Address
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def place_order(request):
+    if request.method == 'POST':
+        payment_method = request.POST.get('payment_method')
+        
+        # Retrieve the cart
+        try:
+            cart = Cart.objects.get(user=request.user)
+        except Cart.DoesNotExist:
+            messages.error(request, 'Your cart is empty.')
+            return redirect('cart')
+
+        # Retrieve cart items and calculate total cost
+        cart_items = CartItem.objects.filter(cart=cart)
+        if not cart_items.exists():
+            messages.error(request, 'Your cart is empty.')
+            return redirect('cart')
+
+        total_cost = sum(item.item.price * item.quantity for item in cart_items)
+
+        # Create an Order instance
+        order = Order.objects.create(
+            buyer=request.user.profile,
+            total_cost=total_cost,
+            payment_method=payment_method,
+            created_at=timezone.now(),
+            is_confirmed=False
+        )
+
+        # Create OrderItem instances to preserve the details of the order
+        for cart_item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                item=cart_item.item,
+                quantity=cart_item.quantity,
+                price_at_purchase=cart_item.item.price
+            )
+
+        # Clear the cart
+        cart.items.clear()
+
+        # Send confirmation email
+        send_mail(
+            'Order Confirmation',
+            f'Your order has been placed successfully. Total cost: LKR {total_cost}.',
+            settings.DEFAULT_FROM_EMAIL,
+            [request.user.email]
+        )
+
+        # Handle different payment methods
+        if payment_method == 'cod':
+            order.is_confirmed = True
+            order.save()
+            messages.success(request, 'Order placed successfully. You will pay cash on delivery.')
+        elif payment_method == 'card':
+            # Placeholder for card payment processing logic
+            messages.success(request, 'Order placed successfully. Payment will be processed shortly.')
+
+        # Redirect to the order confirmation page
+        return redirect('order_confirmation', order_id=order.id)
+    else:
+        return redirect('cart')
+from django.shortcuts import render, get_object_or_404
+from .models import Order
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def order_confirmation(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Retrieve all items associated with the order
+    ordered_items = order.order_items.all()
+
+    context = {
+        'order': order,
+        'ordered_items': ordered_items,
+    }
+    return render(request, 'order_confirmation.html', context)
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Order, Item, Address
+from django.urls import reverse
+
+@login_required
+def seller_orders_view(request):
+    if request.user.profile.user_type != 'seller':
+        return redirect('home')
+
+    seller_items = Item.objects.filter(seller=request.user.profile)
+    orders = Order.objects.filter(order_items__item__in=seller_items).distinct()
+
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        new_status = request.POST.get('status')
+        order = Order.objects.get(id=order_id, order_items__item__in=seller_items)
+        if order:
+            order.status = new_status
+            order.save()
+            return redirect(reverse('seller_orders'))
+
+    return render(request, 'seller_orders.html', {'orders': orders})
