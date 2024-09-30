@@ -1,44 +1,53 @@
-# ai_chat_support/views.py
 from django.shortcuts import render
 from django.http import JsonResponse
-from .forms import ChatForm
-from .models import ChatMessage
-import openai
-from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
+from .models import Chat
+from django.utils import timezone
+from groq import Groq
+import os
 
-# Set OpenAI API key
-openai.api_key = settings.OPENAI_API_KEY
+# Load the Groq API key from environment variables
+groq_api_key = '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'
 
-def chat_view(request):
-    form = ChatForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        user_message = form.cleaned_data['message']
-        
-        try:
-            # Use OpenAI API to get a response
-            response = openai.ChatCompletion.create(
-                model="gpt-4o-mini  ",
-                messages=[{"role": "user", "content": user_message}]
-            )
-            bot_response = response['choices'][0]['message']['content']
+# Instantiate the Groq client with the API key
+client = Groq(api_key=groq_api_key)
 
-            # Save messages to the database
-            ChatMessage.objects.create(user_message=user_message, bot_response=bot_response)
-            
-            # Log the response to debug
-            print(f"Bot Response: {bot_response}")
+def ask_groq(message):
+ try:
+    # Create a completion using the Groq API9+ooy   
+    completion = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": message},
+        ],
+        temperature=1,
+        max_tokens=1024,
+        top_p=1,
+        stream=True,
+        stop=None,
+    )
 
-            # Ensure the response is returned as JSON
-            return JsonResponse({'response': bot_response})
-        
-        except openai.error.OpenAIError as e:
-            # Print the error message to the console
-            print(f"OpenAI API Error: {str(e)}")
-            return JsonResponse({'response': 'An error occurred while fetching the response.'}, status=500)
-        
-        except Exception as e:
-            # Print any other errors to the console
-            print(f"Error: {str(e)}")
-            return JsonResponse({'response': 'An unexpected error occurred.'}, status=500)
+    # Collect the streamed response
+    response_text = ""
+    for chunk in completion:
+        response_text += chunk.choices[0].delta.content or ""
+    print("AI Response: ", response_text)
+    return response_text
+ 
+
+ except Exception as e:
+        print(f"Error in ask_groq: {e}")
+        return "Error in generating response"
+
+def chatbot(request):
     
-    return render(request, 'chat.html', {'form': form})
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        response = ask_groq(message)
+
+        
+
+        return JsonResponse({'message': message, 'response': response})
+
+    return render(request, 'chatbot.html')
