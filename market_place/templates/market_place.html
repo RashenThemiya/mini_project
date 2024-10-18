@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% include 'components/_notice_banner.html' %}
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center">Welcome to the Marketplace</h1>
+        {% include 'components/_dashboard.html' %}
+        <h2 class="mb-4 text-center">Marketplace Items</h2>
+        {% include 'components/_search_filter.html' %}
+        <div class="row">
+            {% if items %}
+                {% for item in items %}
+                    {% include 'components/_item_card.html' with item=item %}
+                {% endfor %}
+            {% else %}
+                <p class="text-center">No items available.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% include 'footer.html' %}
+{% endblock %}

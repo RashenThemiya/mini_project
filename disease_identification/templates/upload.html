@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Disease Identification</title>
+</head>
+<body>
+    <h1>Disease Identification</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="crop">Select your crop:</label>
+        <select name="crop" id="crop">
+            <option value="rice">Rice</option>
+            <option value="pumpkin">Pumpkin</option>
+            <option value="potato">Potato</option>
+        </select>
+        <br><br>
+
+        <label for="image">Upload an image of the leaf:</label>
+        <input type="file" name="image" id="image" accept="image/*" required>
+        <br><br>
+
+        <input type="submit" value="Identify Disease">
+    </form>
+
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</body>
+</html>

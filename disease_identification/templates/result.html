@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Disease Prediction Result</title>
+</head>
+<body>
+    <h1>Disease Prediction Result</h1>
+
+    <!-- Display the predicted classes and probabilities -->
+    <h2>Predicted Diseases:</h2>
+    <ul>
+    {% for disease, probability in predicted_probabilities.items %}
+        <li>{{ disease }}: {{ probability|floatformat:2 }}%</li>
+    {% endfor %}
+    </ul>
+
+    <h2>Predicted Class: {{ predicted_classes.0 }}</h2>  <!-- Use zero-based indexing to get the first predicted class -->
+
+    <!-- Use the correct URL name -->
+    <a href="{% url 'disease_identification_index' %}">Try again</a>
+</body>
+</html>
