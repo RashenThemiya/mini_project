@@ -1,29 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Disease Identification</title>
-</head>
-<body>
-    <h1>Disease Identification</h1>
-    <form method="POST" enctype="multipart/form-data">
+{% extends 'base.html' %}
+
+{% block title %}Disease Identification{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Disease Identification</h1>
+    
+    <!-- How the system works section -->
+    <div class="alert alert-info mt-4">
+        <h4 class="alert-heading">How the System Works:</h4>
+        <p>Follow these simple steps to identify the disease affecting your crop:</p>
+        <ol>
+            <li>Select your crop from the dropdown menu (e.g., Rice, Pumpkin, or Potato).</li>
+            <li>Upload an image of the diseased plant leaf using the upload button.</li>
+            <li>Press the <strong>"Identify Disease"</strong> button.</li>
+            <li>The system will analyze the image and display the likely disease affecting your plant.</li>
+        </ol>
+        <p>Ensure that the image is clear and focused for better results!</p>
+    </div>
+
+    <!-- Disease identification form -->
+    <form method="POST" enctype="multipart/form-data" class="mt-4">
         {% csrf_token %}
-        <label for="crop">Select your crop:</label>
-        <select name="crop" id="crop">
-            <option value="rice">Rice</option>
-            <option value="pumpkin">Pumpkin</option>
-            <option value="potato">Potato</option>
-        </select>
-        <br><br>
+        <div class="form-group">
+            <label for="crop">Select your crop:</label>
+            <select name="crop" id="crop" class="form-control" required>
+                <option value="rice">Rice</option>
+                <option value="pumpkin">Pumpkin</option>
+                <option value="potato">Potato</option>
+            </select>
+        </div>
 
-        <label for="image">Upload an image of the leaf:</label>
-        <input type="file" name="image" id="image" accept="image/*" required>
-        <br><br>
+        <div class="form-group">
+            <label for="image">Upload an image of the leaf:</label>
+            <input type="file" name="image" id="image" accept="image/*" class="form-control-file" required>
+        </div>
 
-        <input type="submit" value="Identify Disease">
+        <button type="submit" class="btn btn-success">Identify Disease</button>
     </form>
 
     {% if error %}
-    <p style="color: red;">{{ error }}</p>
+    <p class="text-danger">{{ error }}</p>
     {% endif %}
-</body>
-</html>
+</div>
+
+{% include 'footer.html' %}
+{% endblock %}

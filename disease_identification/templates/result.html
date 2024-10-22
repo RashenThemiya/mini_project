@@ -1,22 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Disease Prediction Result</title>
-</head>
-<body>
-    <h1>Disease Prediction Result</h1>
+{% extends 'base.html' %}
+<!-- block -->
 
-    <!-- Display the predicted classes and probabilities -->
-    <h2>Predicted Diseases:</h2>
-    <ul>
-    {% for disease, probability in predicted_probabilities.items %}
-        <li>{{ disease }}: {{ probability|floatformat:2 }}%</li>
-    {% endfor %}
-    </ul>
+{% block title %} Disease Prediction Result
+<!-- endblock -->
+{% endblock %}
+<!-- Iblock -->
 
-    <h2>Predicted Class: {{ predicted_classes.0 }}</h2>  <!-- Use zero-based indexing to get the first predicted class -->
+{% block content %}
+<h1>Disease Prediction Result for {{ crop|title }}</h1>
 
-    <!-- Use the correct URL name -->
-    <a href="{% url 'disease_identification_index' %}">Try again</a>
-</body>
-</html>
+<!-- Display the predicted classes and probabilities -->
+<h2>Predicted Diseases and Probabilities:</h2>
+<ul>
+  {% for disease, probability in predicted_probabilities.items %}
+  <li>{{ disease }}: {{ probability|floatformat:2 }}%</li>
+  {% endfor %}
+</ul>
+
+<h2>Detected Disease: {{ predicted_classes.0 }}</h2>
+<!-- Display the detected disease -->
+
+<!-- Use the correct URL name -->
+<a href="{% url 'disease_identification_index' %}">Try again</a>
+
+<!-- Include the footer -->
+{% include 'footer.html' %}
+<!-- endblock -->
+{% endblock %}
