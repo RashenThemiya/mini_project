@@ -1,0 +1,18 @@
+{% if user.is_authenticated %}
+    {% if user.profile.user_type == 'seller' %}
+        <!-- Show 'Delete Item' button if the user is a seller -->
+        <form action="{% url 'delete_item' item.id %}" method="post" class="mt-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger w-100">Delete Item</button>
+        </form>
+    {% else %}
+        <!-- Show 'Add to Cart' button if the user is not a seller -->
+        <form action="{% url 'add_to_cart' item.id %}" method="post" class="mt-2">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" />
+            <button type="submit" class="btn btn-success w-100">Add to Cart</button>
+        </form>
+    {% endif %}
+{% else %}
+    <a href="{% url 'login' %}" class="btn btn-success w-100 mt-2">Buy Now</a>
+{% endif %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Your Orders</h2>
+    <table class="table table-bordered table-striped">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Buyer</th>
+                <th scope="col">Buyer Address</th>
+                <th scope="col">Items</th>
+                <th scope="col">Total Cost (LKR)</th>
+                <th scope="col">Status</th>
+                <th scope="col">Update Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.buyer.user.email }}</td>
+                <td>
+                    {% with order.buyer.user.address_set.first as address %}
+                    <strong>{{ address.name }}</strong><br>
+                    {{ address.address }}<br>
+                    {{ address.district }}, {{ address.country }}<br>
+                    {{ address.phone_number }}
+                    {% endwith %}
+                </td>
+                <td>
+                    <ul class="list-unstyled mb-0">
+                        {% for item in order.order_items.all %}
+                        <li>{{ item.quantity }} x {{ item.item.name }} at {{ item.price_at_purchase }} each</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>{{ order.total_cost }}</td>
+                <td class="{% if order.status == 'processed' %}bg-light text-success{% elif order.status == 'shipped' %}bg-light text-warning{% elif order.status == 'delivered' %}bg-light text-info{% endif %} font-weight-bold">
+                    {{ order.status|capfirst }}
+                </td>
+                <td>
+                    <form method="post" class="d-flex">
+                        {% csrf_token %}
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <select name="status" class="form-control mr-2">
+                            <option value="processed" {% if order.status == 'processed' %}selected{% endif %}>Processed</option>
+                            <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        </select>
+                        <button type="submit" class="btn btn-outline-success">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
