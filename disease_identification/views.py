@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 from django.shortcuts import render
 from tensorflow import keras
 import cv2
-import matplotlib.pyplot as plt
+from .disease_description import DISEASE_DESCRIPTIONS
 
 # Define the base directory of your Django project
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -78,12 +78,23 @@ def disease_identification(request):
 
             # Map predicted class index to a class label
             detected_disease = disease_labels[predicted_class_index]
+            prediction_probability = predictions[0][predicted_class_index] * 100
+
+            # If probability is less than 75%, ask for clearer image
+            if prediction_probability < 75:
+                return render(request, 'upload.html', {
+                    'error': 'Prediction confidence is too low. Please upload a clearer image.'
+                })
+
+            # Get disease description if not healthy
+            description = DISEASE_DESCRIPTIONS.get(detected_disease, 'No description available.')
 
             # Return the detected disease and prediction probabilities to the frontend
             return render(request, 'result.html', {
-                'predicted_classes': [detected_disease],  # Pass the detected disease
-                'predicted_probabilities': {disease_labels[i]: prob * 100 for i, prob in enumerate(predictions[0])},  # Convert to percentages
-                'crop': crop  # Pass the crop to the template for clarity
+                'predicted_classes': [detected_disease],
+                'predicted_probabilities': {disease_labels[i]: prob * 100 for i, prob in enumerate(predictions[0])},
+                'crop': crop,
+                'description': description if detected_disease != 'Healthy' else None
             })
 
         except Exception as e:

@@ -3,15 +3,10 @@
 {% block title %}Disease Prediction Result{% endblock %}
 
 {% block content %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Disease Prediction Result</title>
-</head>
-<body>
+<div class="container mt-5">
     <h1>Disease Prediction Result for {{ crop|title }}</h1>
 
-    <!-- Display the predicted classes and probabilities -->
+    <!-- Display the predicted class and probabilities -->
     <h2>Predicted Diseases and Probabilities:</h2>
     <ul>
     {% for disease, probability in predicted_probabilities.items %}
@@ -19,13 +14,16 @@
     {% endfor %}
     </ul>
 
-    <h2>Detected Disease: {{ predicted_classes.0 }}</h2>  <!-- Display the detected disease -->
+    <h2>Detected Disease: {{ predicted_classes.0 }}</h2>
 
-    <!-- Use the correct URL name -->
+    <!-- Show the description if the disease is not 'Healthy' -->
+    {% if description %}
+        <h3>Description:</h3>
+        <p>{{ description }}</p>
+    {% endif %}
+
     <a href="{% url 'disease_identification_index' %}">Try again</a>
-</body>
-</html>
-
+</div>
 
 {% include 'footer.html' %}
 {% endblock %}
