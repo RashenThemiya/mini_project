@@ -3,31 +3,29 @@
 {% block title %}Disease Prediction Result{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center">Disease Prediction Result for {{ crop|title }}</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Disease Prediction Result</title>
+</head>
+<body>
+    <h1>Disease Prediction Result for {{ crop|title }}</h1>
 
     <!-- Display the predicted classes and probabilities -->
-    <div class="mt-4">
-        <h2 class="text-success">Predicted Diseases:</h2>
-        <ul class="list-group">
-        {% for disease, probability in predicted_probabilities.items %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ disease }} 
-                <span class="badge badge-success badge-pill">{{ probability|floatformat:2 }}%</span>
-            </li>
-        {% endfor %}
-        </ul>
-    </div>
+    <h2>Predicted Diseases and Probabilities:</h2>
+    <ul>
+    {% for disease, probability in predicted_probabilities.items %}
+        <li>{{ disease }}: {{ probability|floatformat:2 }}%</li>
+    {% endfor %}
+    </ul>
 
-    <div class="mt-4">
-        <h2 class="text-info">Most Likely Disease: <span class="font-weight-bold">{{ predicted_classes.0 }}</span></h2> 
-    </div>
+    <h2>Detected Disease: {{ predicted_classes.0 }}</h2>  <!-- Display the detected disease -->
 
-    <!-- Link to retry -->
-    <div class="mt-4">
-        <a href="{% url 'disease_identification_index' %}" class="btn btn-success">Try Again</a>
-    </div>
-</div>
+    <!-- Use the correct URL name -->
+    <a href="{% url 'disease_identification_index' %}">Try again</a>
+</body>
+</html>
+
 
 {% include 'footer.html' %}
 {% endblock %}
