@@ -1,9 +1,7 @@
 {% extends 'base.html' %}
-
 {% load static %}
 
 {% block content %}
-
 <div class="container mt-5">
     <div class="row">
         <!-- Form Column -->
@@ -12,8 +10,58 @@
                 <h3 class="text-success mb-4" style="font-size: 1.8rem; font-weight: bold;">Submit Your Crop Data</h3>
                 <form id="cropForm" class="needs-validation" novalidate>
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-success mt-3">Submit</button>
+                    <!-- Nitrogen Input -->
+                    <div class="form-group">
+                        <label for="nitrogen">Nitrogen (N) <small>(Range: 0 - 140 mg/kg)</small></label>
+                        <input type="number" class="form-control" id="nitrogen" name="nitrogen" min="0" max="140" step="1" placeholder="e.g., 50 mg/kg" required>
+                        <div class="invalid-feedback">Please enter a valid nitrogen value (0 - 140 mg/kg).</div>
+                    </div>
+                    
+                    <!-- Phosphorus Input -->
+                    <div class="form-group">
+                        <label for="phosphorus">Phosphorus (P) <small>(Range: 5 - 145 mg/kg)</small></label>
+                        <input type="number" class="form-control" id="phosphorus" name="phosphorus" min="5" max="145" step="1" placeholder="e.g., 50 mg/kg" required>
+                        <div class="invalid-feedback">Please enter a valid phosphorus value (5 - 145 mg/kg).</div>
+                    </div>
+                    
+                    <!-- Potassium Input -->
+                    <div class="form-group">
+                        <label for="potassium">Potassium (K) <small>(Range: 5 - 205 mg/kg)</small></label>
+                        <input type="number" class="form-control" id="potassium" name="potassium" min="5" max="205" step="1" placeholder="e.g., 48 mg/kg" required>
+                        <div class="invalid-feedback">Please enter a valid potassium value (5 - 205 mg/kg).</div>
+                    </div>
+                    
+                    <!-- Temperature Input -->
+                    <div class="form-group">
+                        <label for="temperature">Temperature <small>(Range: 8.8 - 43.6 °C)</small></label>
+                        <input type="number" class="form-control" id="temperature" name="temperature" min="8.8" max="43.6" step="0.1" placeholder="e.g., 25.6 °C" required>
+                        <div class="invalid-feedback">Please enter a valid temperature value (8.8 - 43.6 °C).</div>
+                    </div>
+                    
+                    <!-- Humidity Input -->
+                    <div class="form-group">
+                        <label for="humidity">Humidity <small>(Range: 14.3 - 99.9 %)</small></label>
+                        <input type="number" class="form-control" id="humidity" name="humidity" min="14.3" max="99.9" step="0.1" placeholder="e.g., 71.5 %" required>
+                        <div class="invalid-feedback">Please enter a valid humidity value (14.3 - 99.9 %).</div>
+                    </div>
+                    
+                    <!-- pH Input -->
+                    <div class="form-group">
+                        <label for="ph">Soil pH <small>(Range: 3.5 - 9.9)</small></label>
+                        <input type="number" class="form-control" id="ph" name="ph" min="3.5" max="9.9" step="0.1" placeholder="e.g., 6.5" required>
+                        <div class="invalid-feedback">Please enter a valid pH value (3.5 - 9.9).</div>
+                    </div>
+                    
+                    <!-- Rainfall Input -->
+                    <div class="form-group">
+                        <label for="rainfall">Rainfall <small>(Range: 20.2 - 298.6 mm)</small></label>
+                        <input type="number" class="form-control" id="rainfall" name="rainfall" min="20.2" max="298.6" step="0.1" placeholder="e.g., 103.5 mm" required>
+                        <div class="invalid-feedback">Please enter a valid rainfall value (20.2 - 298.6 mm).</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success mt-3 w-100">
+                        <i class="fas fa-paper-plane"></i> Submit
+                    </button>
                 </form>
             </div>
         </div>
@@ -23,17 +71,14 @@
             {% include 'instructions.html' %}
         </div>
     </div>
-    
-    {% include 'purchase_equipment.html' %} <!-- Include the new component here -->
 
+    {% include 'purchase_equipment.html' %}
 </div>
 
 <!-- Include jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Enable jQuery's noConflict mode
     var $j = jQuery.noConflict();
-
     console.log("jQuery version: " + $j.fn.jquery);
 
     // Form validation function
@@ -42,14 +87,15 @@
         $j('#cropForm input, #cropForm select').each(function() {
             let value = $j(this).val();
             if (!$j(this).prop('required') && value.trim() === '') {
-                // Skip non-required fields that are empty
                 return;
             }
             if (!value || (this.type === 'number' && isNaN(value))) {
                 isValid = false;
                 $j(this).addClass('is-invalid');
+                $j(this).next('.invalid-feedback').text('Please enter a valid value.');
             } else {
                 $j(this).removeClass('is-invalid');
+                $j(this).next('.invalid-feedback').text('');
             }
         });
         return isValid;
@@ -57,39 +103,34 @@
 
     $j(document).ready(function() {
         $j('#cropForm').on('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-            
+            event.preventDefault();
+
             if (validateForm()) {
                 $j.ajax({
-                    url: "{% url 'crop_recommendation_index' %}", // The view handling the AJAX request
+                    url: "{% url 'crop_recommendation_index' %}",
                     method: "POST",
-                    data: $j(this).serialize(), // Serialize the form data
+                    data: $j(this).serialize(),
                     success: function(data) {
-                        // Update the modal content with the recommended crop
                         $j('#cropRecommendation').text(data.recommended_crop);
-                        // Show the modal
                         $j('#resultModal').modal('show');
                     },
                     error: function(xhr, status, error) {
-                        alert("An error occurred: " + error); // Error handling
+                        alert("An error occurred: " + error);
                     }
                 });
             } else {
-                alert("Please fill out all required fields with valid values."); // Notify the user
+                alert("Please fill out all required fields with valid values.");
             }
         });
 
-        // Optional: Add Bootstrap's custom validation styles
         $j('#cropForm').on('input change', function() {
             validateForm();
         });
     });
 </script>
 
-<!-- FontAwesome CDN (optional, used for icons) -->
+<!-- FontAwesome and Bootstrap CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
-<!-- Bootstrap CSS (for modal and form) -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 <!-- Modal HTML -->
@@ -112,7 +153,7 @@
     </div>
 </div>
 
-<!-- Bootstrap JS (for modal functionality) -->
+<!-- Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
 <!-- Custom Styles -->
@@ -134,14 +175,6 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    .form-container h4 {
-        transition: color 0.5s ease;
-    }
-
-    .form-container:hover h4 {
-        color: #155724;
-    }
-
     .form-container form {
         transition: opacity 0.3s ease;
     }
@@ -157,9 +190,10 @@
     .invalid-feedback {
         display: block;
         color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
     }
 </style>
 
 {% include 'footer.html' %}
-
 {% endblock %}

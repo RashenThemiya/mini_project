@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 text-success">Your Cart</h1>
+
+    <div class="row">
+        <!-- Cart Items -->
+        <div class="col-md-8">
+            <div class="cart-items">
+                {% if cart_items %}
+                    <ul class="list-group">
+                        {% for cart_item in cart_items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-light border-success">
+                                <div class="item-image">
+                                    {% if cart_item.item.image %}
+                                        <img src="{{ cart_item.item.image.url }}" alt="{{ cart_item.item.name }}" class="img-thumbnail" style="max-width: 100px;">
+                                    {% else %}
+                                        <img src="{% static 'images/default-item.png' %}" alt="{{ cart_item.item.name }}" class="img-thumbnail" style="max-width: 100px;">
+                                    {% endif %}
+                                </div>
+                                <div class="item-details ml-3">
+                                    <h5 class="text-success">{{ cart_item.item.name }}</h5>
+                                    <p>Price: LKR {{ cart_item.item.price }}</p>
+                                    <p>Quantity: {{ cart_item.quantity }}</p>
+                                </div>
+                                <div class="item-actions">
+                                    <form action="{% url 'remove_from_cart' cart_item.item.id %}" method="post" class="ml-3">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success">Remove</button>
+                                    </form>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-success">Your cart is empty.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Right Column: Shipping Address and Order Details -->
+        <div class="col-md-4">
+            <div class="row">
+                <!-- Shipping Address -->
+                <div class="col-md-12">
+                    {% if addresses %}
+                        <h4 class="mt-4 mb-3 text-success">Shipping Address</h4>
+                        <ul class="list-group shadow-sm">
+                            {% for address in addresses %}
+                                <li class="list-group-item p-3 mb-2 border-success rounded" style="background-color: #eafaf1;">
+                                    <strong class="text-success">{{ address.name }}</strong><br>
+                                    {{ address.address }}, {{ address.district }}<br>
+                                    {{ address.country }}<br>
+                                    <span class="text-muted">Phone:</span> {{ address.phone_number }}
+                                    
+                                    <div class="text-end mt-2">
+                                        <a href="{% url 'edit_address' address.id %}" class="btn btn-outline-success btn-sm">Edit Address</a>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="alert alert-warning mt-3">No address found. Please <a href="{% url 'add_address' %}" class="alert-link">add an address</a>.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Total Cost and Payment Method -->
+                {% if cart_items %}
+                <div class="col-md-12 mt-4">
+                    <div class="total-cost mb-4">
+                        <h4 class="text-success">Total Cost: LKR {{ total_cost }}</h4>
+                    </div>
+
+                    <form action="{% url 'place_order' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            <label for="payment_method" class="text-success">Payment Method</label>
+                            <select name="payment_method" id="payment_method" class="form-control border-success" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="cod">Cash on Delivery</option>
+                                <option value="card">Card Payment</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block">Place Order</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'footer.html' %}
+{% endblock %}
