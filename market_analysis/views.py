@@ -7,6 +7,7 @@ def index(request):
 from django.shortcuts import render
 
 # Create your views here.
+import joblib
 from django.shortcuts import render
 from .forms import PricePredictionForm
 from .models import PricePrediction
@@ -19,38 +20,60 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 
 def train_and_predict(df, start_date, end_date, admin1, admin2, market, category, commodity, unit):
-    # Preprocess the data
-    df['date'] = pd.to_datetime(df['date'])
-    df['year'] = df['date'].dt.year
-    df['month'] = df['date'].dt.month
-    df['day'] = df['date'].dt.day
-    df = df.drop(columns=['date'])
+    # Ensure the 'models' directory exists
+    model_dir = os.path.join(settings.BASE_DIR, 'models')
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
 
-    # Select features and target
-    X = df[['admin1', 'admin2', 'market', 'category', 'commodity', 'unit', 'year', 'month', 'day']]
-    y = df['price']
+    # Path to save the trained model
+    model_path = os.path.join(model_dir, 'market_analysis.pkl')
 
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Check if the model already exists
+    if os.path.exists(model_path):
+        try:
+            # Load the saved model
+            pipeline = joblib.load(model_path)
+        except Exception as e:
+            # Handle error if the model cannot be loaded
+            print(f"Error loading the model: {e}")
+            # Optionally, retrain the model if loading fails
+            return []
+    else:
+        # Preprocess the data
+        df['date'] = pd.to_datetime(df['date'])
+        df['year'] = df['date'].dt.year
+        df['month'] = df['date'].dt.month
+        df['day'] = df['date'].dt.day
+        df = df.drop(columns=['date'])
 
-    # Preprocessing pipeline for categorical and numeric features
-    categorical_features = ['admin1', 'admin2', 'market', 'category', 'commodity', 'unit']
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('cat', OneHotEncoder(), categorical_features),
-            ('num', 'passthrough', ['year', 'month', 'day'])
-        ]
-    )
+        # Select features and target
+        X = df[['admin1', 'admin2', 'market', 'category', 'commodity', 'unit', 'year', 'month', 'day']]
+        y = df['price']
 
-    # Define the model pipeline
-    pipeline = Pipeline(steps=[
-        ('preprocessor', preprocessor),
-        ('model', RandomForestRegressor(n_estimators=100, random_state=42))
-    ])
+        # Split the data into training and testing sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Train the model
-    pipeline.fit(X_train, y_train)
+        # Preprocessing pipeline for categorical and numeric features
+        categorical_features = ['admin1', 'admin2', 'market', 'category', 'commodity', 'unit']
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ('cat', OneHotEncoder(), categorical_features),
+                ('num', 'passthrough', ['year', 'month', 'day'])
+            ]
+        )
 
+        # Define the model pipeline
+        pipeline = Pipeline(steps=[
+            ('preprocessor', preprocessor),
+            ('model', RandomForestRegressor(n_estimators=100, random_state=42))
+        ])
+
+        # Train the model
+        pipeline.fit(X_train, y_train)
+
+        # Save the trained model for future use
+        joblib.dump(pipeline, model_path)
+    
     # Generate predictions for the input date range
     date_range = pd.date_range(start=start_date, end=end_date)
     predictions = []
@@ -62,8 +85,7 @@ def train_and_predict(df, start_date, end_date, admin1, admin2, market, category
         predicted_price = pipeline.predict(input_features)
         predictions.append((date.strftime('%Y-%m-%d'), predicted_price[0]))
 
-    return predictions  # Return the list of tuples (date, predicted price)
-
+    return predictions 
 def predict_price_view(request):
     if request.method == 'POST':
         form = PricePredictionForm(request.POST)
