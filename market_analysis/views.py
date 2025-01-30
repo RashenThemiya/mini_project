@@ -1,6 +1,9 @@
 from django.shortcuts import render
 import os
 from django.conf import settings
+import matplotlib.pyplot as plt
+import io
+import urllib, base64
 def index(request):
     return render(request, 'market_analysis.html')
 
@@ -99,12 +102,11 @@ def predict_price_view(request):
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
 
-
             dataset_path = os.path.join(settings.BASE_DIR, 'dataset', 'dataset.csv')
             df = pd.read_csv(dataset_path)
 
             # Get predictions for each date
-            predictions = train_and_predict(df,start_date, end_date, admin1, admin2, market, category, commodity, unit)
+            predictions = train_and_predict(df, start_date, end_date, admin1, admin2, market, category, commodity, unit)
 
             # Save the result in the database
             for date, predicted_price in predictions:
@@ -120,10 +122,55 @@ def predict_price_view(request):
                     predicted_price=predicted_price
                 )
 
-            return render(request, 'result.html', {'predictions': predictions})
+            # Prepare data for passing to the template
+            prediction_details = []
+            for date, predicted_price in predictions:
+                prediction_details.append({
+                    'date': date,
+                    'predicted_price': predicted_price,
+                    'admin1': admin1,
+                    'admin2': admin2,
+                    'market': market,
+                    'category': category,
+                    'commodity': commodity,
+                    'unit': unit,
+                    'start_date': start_date,
+                    'end_date': end_date
+                })
+
+            # Extract dates and prices for plotting
+            dates = [x[0] for x in predictions]
+            prices = [x[1] for x in predictions]
+
+            # Plotting the graph
+            plt.figure(figsize=(12, 6))
+            plt.plot(dates, prices, marker='o', color='blue')
+            plt.title('Predicted Prices Over Time')
+            plt.xlabel('Date')
+            plt.ylabel('Price')
+
+            # Handle large date ranges by setting x-ticks dynamically
+            interval = max(len(dates) // 10, 1)  # Show x-ticks at reasonable intervals
+            plt.xticks(dates[::interval], rotation=45)
+
+            # Improve layout and add grid
+            plt.grid(True)
+            plt.tight_layout()
+
+            # Save the plot to a bytes buffer
+            buffer = io.BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image_png = buffer.getvalue()
+            buffer.close()
+
+            # Encode the image to base64
+            graph_url = base64.b64encode(image_png).decode('utf-8')
+            graph_url = f"data:image/png;base64,{graph_url}"
+
+            return render(request, 'result.html', {'prediction_details': prediction_details, 'graph_url': graph_url})
 
     else:
         form = PricePredictionForm()
 
     return render(request, 'predict.html', {'form': form})
-
