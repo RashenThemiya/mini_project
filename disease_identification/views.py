@@ -13,9 +13,9 @@ from django.conf import settings
 model_dir = os.path.join(settings.BASE_DIR, 'models')
 # Paths to the models using absolute paths (dynamic handling for .keras models)
 MODEL_PATHS = {
-    'rice': os.path.join(model_dir, 'Rice.keras'),
-    'pumpkin': os.path.join(model_dir, 'Pumpkin.keras'),
-    'potato': os.path.join(model_dir, 'models', 'Potato.keras')
+    'rice': os.path.join(model_dir, 'rice.keras'),
+    'pumpkin': os.path.join(model_dir, 'pumpkin.keras'),
+    'potato': os.path.join(model_dir, 'potato.keras')
 }
 print("Checking file:", os.path.exists(MODEL_PATHS['rice']))  # Check if the file exists
 # Dictionary mapping each crop to the diseases that its model predicts
