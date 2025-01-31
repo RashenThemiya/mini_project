@@ -7,17 +7,17 @@ from django.shortcuts import render
 from tensorflow import keras
 import cv2
 from .disease_description import DISEASE_DESCRIPTIONS
-
+from django.conf import settings
 # Define the base directory of your Django project
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+model_dir = os.path.join(settings.BASE_DIR, 'models')
 # Paths to the models using absolute paths (dynamic handling for .keras models)
 MODEL_PATHS = {
-    'rice': os.path.join(BASE_DIR, 'models', 'Rice.keras'),
-    'pumpkin': os.path.join(BASE_DIR, 'models', 'Pumpkin.keras'),
-    'potato': os.path.join(BASE_DIR, 'models', 'Potato.keras')
+    'rice': os.path.join(model_dir, 'Rice.keras'),
+    'pumpkin': os.path.join(model_dir, 'Pumpkin.keras'),
+    'potato': os.path.join(model_dir, 'models', 'Potato.keras')
 }
-print("Checking file:", os.path.exists(model_path))
+print("Checking file:", os.path.exists(MODEL_PATHS['rice']))  # Check if the file exists
 # Dictionary mapping each crop to the diseases that its model predicts
 DISEASE_LABELS = {
     'rice': ['Bacterial blight', 'Brown spot', 'Leafsmut'],
