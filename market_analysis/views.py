@@ -168,7 +168,7 @@ def predict_price_view(request):
             graph_url = base64.b64encode(image_png).decode('utf-8')
             graph_url = f"data:image/png;base64,{graph_url}"
 
-            return render(request, 'result.html', {'prediction_details': prediction_details, 'graph_url': graph_url})
+            return render(request, 'resulte.html', {'prediction_details': prediction_details, 'graph_url': graph_url})
 
     else:
         form = PricePredictionForm()
