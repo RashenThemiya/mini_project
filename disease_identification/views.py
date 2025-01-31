@@ -26,14 +26,18 @@ DISEASE_LABELS = {
 }
 
 def load_model_based_on_crop(crop: str):
-    """
-    Loads the model based on the selected crop.
-    """
     model_path = MODEL_PATHS.get(crop)
-    if model_path and os.path.exists(model_path):
-        model = keras.models.load_model(model_path)
-    else:
-        raise ValueError(f"Model for {crop} not found!")
+    
+    print(f"🔍 Checking model path: {model_path}")  # Debugging line
+    
+    if not model_path:
+        raise ValueError(f"🚨 No model path found for {crop} in MODEL_PATHS dictionary!")
+
+    if not os.path.exists(model_path):
+        raise ValueError(f"🚨 Model file not found at: {model_path}. Check if the file exists!")
+
+    # If the file exists, try loading the model
+    model = keras.models.load_model(model_path)
     return model
 
 def preprocess_image(image_path):
