@@ -180,9 +180,14 @@
                 <li class="nav-item {% if request.path == '/market_place/' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'market_place_index' %}">Market Place</a>
                 </li>
+                <!-- New Reel Tab -->
+                <li class="nav-item {% if request.path == '/reel/' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'reel_index' %}">Reel</a>
+                </li>
             </ul>
         </div>
     </nav>
+    
 
     
         {% block content %}

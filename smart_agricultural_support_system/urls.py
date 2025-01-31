@@ -12,5 +12,6 @@ urlpatterns = [
     path('disease_identification/', include('disease_identification.urls')),  # Disease Identification app
     path('ai_chat_support/', include('ai_chat_support.urls')),  # AI Chat Support app
     path('market_place/', include('market_place.urls')),# Market Place app
+       
     
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
