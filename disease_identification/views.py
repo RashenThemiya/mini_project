@@ -17,7 +17,7 @@ MODEL_PATHS = {
     'pumpkin': os.path.join(BASE_DIR, 'models', 'Pumpkin.keras'),
     'potato': os.path.join(BASE_DIR, 'models', 'Potato.keras')
 }
-
+print("Checking file:", os.path.exists(model_path))
 # Dictionary mapping each crop to the diseases that its model predicts
 DISEASE_LABELS = {
     'rice': ['Bacterial blight', 'Brown spot', 'Leafsmut'],
