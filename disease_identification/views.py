@@ -13,9 +13,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Paths to the models using absolute paths (dynamic handling for .keras models)
 MODEL_PATHS = {
-    'rice': os.path.join(BASE_DIR, 'disease_identification/models', 'Rice.keras'),
-    'pumpkin': os.path.join(BASE_DIR, 'disease_identification/models', 'Pumpkin.keras'),
-    'potato': os.path.join(BASE_DIR, 'disease_identification/models', 'Potato.keras')
+    'rice': os.path.join(BASE_DIR, 'models', 'Rice.keras'),
+    'pumpkin': os.path.join(BASE_DIR, 'models', 'Pumpkin.keras'),
+    'potato': os.path.join(BASE_DIR, 'models', 'Potato.keras')
 }
 
 # Dictionary mapping each crop to the diseases that its model predicts
