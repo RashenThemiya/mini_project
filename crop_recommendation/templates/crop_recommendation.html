@@ -2,6 +2,58 @@
 {% load static %}
 
 {% block content %}
+<!-- Custom Styles -->
+<style>
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group span {
+        font-weight: bold;
+        color: #28a745;
+        margin-top: 5px;
+    }
+
+    input[type="range"] {
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .form-container {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .slider {
+        appearance: none;
+        width: 100%;
+        height: 14px;
+        border-radius: 10px;
+        background: #ddd;
+        outline: none;
+        transition: background 0.3s ease-in-out;
+    }
+    
+    .slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        background: #ffffff;
+        border: 3px solid #28a745;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out, border 0.2s ease-in-out;
+    }
+    
+    .slider::-webkit-slider-thumb:hover {
+        transform: scale(1.3);
+        border: 3px solid #1e7e34; /* Darker green on hover */
+    }
+    
+</style>
 <div class="container mt-5">
     <div class="row">
         <!-- Form Column -->
@@ -79,6 +131,7 @@
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+
 <script>
     function updateValue(spanId, value) {
         document.getElementById(spanId).innerText = value;
@@ -102,6 +155,8 @@
             });
         });
     });
+
+
 </script>
 
 <!-- Modal for Recommendation Result -->
@@ -127,31 +182,7 @@
 <!-- Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-<!-- Custom Styles -->
-<style>
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
 
-    .form-group span {
-        font-weight: bold;
-        color: #28a745;
-        margin-top: 5px;
-    }
-
-    input[type="range"] {
-        width: 100%;
-        cursor: pointer;
-    }
-
-    .form-container {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-</style>
 
 {% include 'footer.html' %}
 {% endblock %}
