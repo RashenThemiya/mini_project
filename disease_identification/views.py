@@ -7,17 +7,17 @@ from django.shortcuts import render
 from tensorflow import keras
 import cv2
 from .disease_description import DISEASE_DESCRIPTIONS
-
+from django.conf import settings
 # Define the base directory of your Django project
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+model_dir = os.path.join(settings.BASE_DIR, 'models')
 # Paths to the models using absolute paths (dynamic handling for .keras models)
 MODEL_PATHS = {
-    'rice': os.path.join(BASE_DIR, 'disease_identification/models', 'Rice.keras'),
-    'pumpkin': os.path.join(BASE_DIR, 'disease_identification/models', 'Pumpkin.keras'),
-    'potato': os.path.join(BASE_DIR, 'disease_identification/models', 'Potato.keras')
+    'rice': os.path.join(model_dir, 'rice.keras'),
+    'pumpkin': os.path.join(model_dir, 'pumpkin.keras'),
+    'potato': os.path.join(model_dir, 'potato.keras')
 }
-
+print("Checking file:", os.path.exists(MODEL_PATHS['rice']))  # Check if the file exists
 # Dictionary mapping each crop to the diseases that its model predicts
 DISEASE_LABELS = {
     'rice': ['Bacterial blight', 'Brown spot', 'Leafsmut'],
@@ -26,14 +26,18 @@ DISEASE_LABELS = {
 }
 
 def load_model_based_on_crop(crop: str):
-    """
-    Loads the model based on the selected crop.
-    """
     model_path = MODEL_PATHS.get(crop)
-    if model_path and os.path.exists(model_path):
-        model = keras.models.load_model(model_path)
-    else:
-        raise ValueError(f"Model for {crop} not found!")
+    
+    print(f"🔍 Checking model path: {model_path}")  # Debugging line
+    
+    if not model_path:
+        raise ValueError(f"🚨 No model path found for {crop} in MODEL_PATHS dictionary!")
+
+    if not os.path.exists(model_path):
+        raise ValueError(f"🚨 Model file not found at: {model_path}. Check if the file exists!")
+
+    # If the file exists, try loading the model
+    model = keras.models.load_model(model_path)
     return model
 
 def preprocess_image(image_path):

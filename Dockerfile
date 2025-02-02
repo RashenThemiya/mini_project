@@ -1,3 +1,4 @@
+
 # Use the official Python image from the Docker Hub
 FROM python:3.11-slim
 
@@ -20,4 +21,4 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Set the command to run the application
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000" ]

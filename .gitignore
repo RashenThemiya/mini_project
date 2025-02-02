@@ -1,2 +1,3 @@
 # .gitignore
 .env
+models/market_analysis.pkl

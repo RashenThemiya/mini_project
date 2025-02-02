@@ -1,0 +1,34 @@
+{% if request.user.is_authenticated and request.user.profile.user_type == 'seller' %}
+<div class="card mb-4 shadow-lg border-0">
+    <div class="card-body bg-light rounded p-4">
+        <h4 class="text-center text-success mb-3">
+            <i class="fas fa-edit"></i> Add New Post
+        </h4>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group mb-3">
+                <label for="title"><i class="fas fa-heading"></i> Post Title</label>
+                <input type="text" name="title" class="form-control rounded-pill" placeholder="Enter title..." required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="content"><i class="fas fa-align-left"></i> Post Content</label>
+                <textarea name="content" class="form-control rounded" rows="4" placeholder="Write something interesting..." required></textarea>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="image"><i class="fas fa-image"></i> Upload Image</label>
+                <input type="file" name="image" class="form-control-file" required>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-success px-4 py-2 rounded-pill shadow-sm">
+                    <i class="fas fa-paper-plane"></i> Post
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}

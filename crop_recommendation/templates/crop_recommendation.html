@@ -2,6 +2,58 @@
 {% load static %}
 
 {% block content %}
+<!-- Custom Styles -->
+<style>
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group span {
+        font-weight: bold;
+        color: #28a745;
+        margin-top: 5px;
+    }
+
+    input[type="range"] {
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .form-container {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .slider {
+        appearance: none;
+        width: 100%;
+        height: 14px;
+        border-radius: 10px;
+        background: #ddd;
+        outline: none;
+        transition: background 0.3s ease-in-out;
+    }
+    
+    .slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        background: #ffffff;
+        border: 3px solid #28a745;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out, border 0.2s ease-in-out;
+    }
+    
+    .slider::-webkit-slider-thumb:hover {
+        transform: scale(1.3);
+        border: 3px solid #1e7e34; /* Darker green on hover */
+    }
+    
+</style>
 <div class="container mt-5">
     <div class="row">
         <!-- Form Column -->
@@ -10,55 +62,56 @@
                 <h3 class="text-success mb-4" style="font-size: 1.8rem; font-weight: bold;">Submit Your Crop Data</h3>
                 <form id="cropForm" class="needs-validation" novalidate>
                     {% csrf_token %}
-                    <!-- Nitrogen Input -->
+
+                    <!-- Nitrogen Slider -->
                     <div class="form-group">
-                        <label for="nitrogen">Nitrogen (N) <small>(Range: 0 - 140 mg/kg)</small></label>
-                        <input type="number" class="form-control" id="nitrogen" name="nitrogen" min="0" max="140" step="1" placeholder="e.g., 50 mg/kg" required>
-                        <div class="invalid-feedback">Please enter a valid nitrogen value (0 - 140 mg/kg).</div>
+                        <label for="nitrogen">Nitrogen (N) <small>(0 - 140 mg/kg)</small></label>
+                        <input type="range" class="form-control-range" id="nitrogen" name="nitrogen" min="0" max="140" step="1" value="50" oninput="updateValue('nitrogenValue', this.value)">
+                        <span id="nitrogenValue">50</span> mg/kg
                     </div>
-                    
-                    <!-- Phosphorus Input -->
+
+                    <!-- Phosphorus Slider -->
                     <div class="form-group">
-                        <label for="phosphorus">Phosphorus (P) <small>(Range: 5 - 145 mg/kg)</small></label>
-                        <input type="number" class="form-control" id="phosphorus" name="phosphorus" min="5" max="145" step="1" placeholder="e.g., 50 mg/kg" required>
-                        <div class="invalid-feedback">Please enter a valid phosphorus value (5 - 145 mg/kg).</div>
+                        <label for="phosphorus">Phosphorus (P) <small>(5 - 145 mg/kg)</small></label>
+                        <input type="range" class="form-control-range" id="phosphorus" name="phosphorus" min="5" max="145" step="1" value="50" oninput="updateValue('phosphorusValue', this.value)">
+                        <span id="phosphorusValue">50</span> mg/kg
                     </div>
-                    
-                    <!-- Potassium Input -->
+
+                    <!-- Potassium Slider -->
                     <div class="form-group">
-                        <label for="potassium">Potassium (K) <small>(Range: 5 - 205 mg/kg)</small></label>
-                        <input type="number" class="form-control" id="potassium" name="potassium" min="5" max="205" step="1" placeholder="e.g., 48 mg/kg" required>
-                        <div class="invalid-feedback">Please enter a valid potassium value (5 - 205 mg/kg).</div>
+                        <label for="potassium">Potassium (K) <small>(5 - 205 mg/kg)</small></label>
+                        <input type="range" class="form-control-range" id="potassium" name="potassium" min="5" max="205" step="1" value="48" oninput="updateValue('potassiumValue', this.value)">
+                        <span id="potassiumValue">48</span> mg/kg
                     </div>
-                    
-                    <!-- Temperature Input -->
+
+                    <!-- Temperature Slider -->
                     <div class="form-group">
-                        <label for="temperature">Temperature <small>(Range: 8.8 - 43.6 °C)</small></label>
-                        <input type="number" class="form-control" id="temperature" name="temperature" min="8.8" max="43.6" step="0.1" placeholder="e.g., 25.6 °C" required>
-                        <div class="invalid-feedback">Please enter a valid temperature value (8.8 - 43.6 °C).</div>
+                        <label for="temperature">Temperature <small>(8.8 - 43.6 °C)</small></label>
+                        <input type="range" class="form-control-range" id="temperature" name="temperature" min="8.8" max="43.6" step="0.1" value="25.6" oninput="updateValue('temperatureValue', this.value)">
+                        <span id="temperatureValue">25.6</span> °C
                     </div>
-                    
-                    <!-- Humidity Input -->
+
+                    <!-- Humidity Slider -->
                     <div class="form-group">
-                        <label for="humidity">Humidity <small>(Range: 14.3 - 99.9 %)</small></label>
-                        <input type="number" class="form-control" id="humidity" name="humidity" min="14.3" max="99.9" step="0.1" placeholder="e.g., 71.5 %" required>
-                        <div class="invalid-feedback">Please enter a valid humidity value (14.3 - 99.9 %).</div>
+                        <label for="humidity">Humidity <small>(14.3 - 99.9 %)</small></label>
+                        <input type="range" class="form-control-range" id="humidity" name="humidity" min="14.3" max="99.9" step="0.1" value="71.5" oninput="updateValue('humidityValue', this.value)">
+                        <span id="humidityValue">71.5</span> %
                     </div>
-                    
-                    <!-- pH Input -->
+
+                    <!-- pH Slider -->
                     <div class="form-group">
-                        <label for="ph">Soil pH <small>(Range: 3.5 - 9.9)</small></label>
-                        <input type="number" class="form-control" id="ph" name="ph" min="3.5" max="9.9" step="0.1" placeholder="e.g., 6.5" required>
-                        <div class="invalid-feedback">Please enter a valid pH value (3.5 - 9.9).</div>
+                        <label for="ph">Soil pH <small>(3.5 - 9.9)</small></label>
+                        <input type="range" class="form-control-range" id="ph" name="ph" min="3.5" max="9.9" step="0.1" value="6.5" oninput="updateValue('phValue', this.value)">
+                        <span id="phValue">6.5</span>
                     </div>
-                    
-                    <!-- Rainfall Input -->
+
+                    <!-- Rainfall Slider -->
                     <div class="form-group">
-                        <label for="rainfall">Rainfall <small>(Range: 20.2 - 298.6 mm)</small></label>
-                        <input type="number" class="form-control" id="rainfall" name="rainfall" min="20.2" max="298.6" step="0.1" placeholder="e.g., 103.5 mm" required>
-                        <div class="invalid-feedback">Please enter a valid rainfall value (20.2 - 298.6 mm).</div>
+                        <label for="rainfall">Rainfall <small>(20.2 - 298.6 mm)</small></label>
+                        <input type="range" class="form-control-range" id="rainfall" name="rainfall" min="20.2" max="298.6" step="0.1" value="103.5" oninput="updateValue('rainfallValue', this.value)">
+                        <span id="rainfallValue">103.5</span> mm
                     </div>
-                    
+
                     <button type="submit" class="btn btn-success mt-3 w-100">
                         <i class="fas fa-paper-plane"></i> Submit
                     </button>
@@ -75,65 +128,38 @@
     {% include 'purchase_equipment.html' %}
 </div>
 
-<!-- Include jQuery -->
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    var $j = jQuery.noConflict();
-    console.log("jQuery version: " + $j.fn.jquery);
 
-    // Form validation function
-    function validateForm() {
-        let isValid = true;
-        $j('#cropForm input, #cropForm select').each(function() {
-            let value = $j(this).val();
-            if (!$j(this).prop('required') && value.trim() === '') {
-                return;
-            }
-            if (!value || (this.type === 'number' && isNaN(value))) {
-                isValid = false;
-                $j(this).addClass('is-invalid');
-                $j(this).next('.invalid-feedback').text('Please enter a valid value.');
-            } else {
-                $j(this).removeClass('is-invalid');
-                $j(this).next('.invalid-feedback').text('');
-            }
-        });
-        return isValid;
+
+<script>
+    function updateValue(spanId, value) {
+        document.getElementById(spanId).innerText = value;
     }
 
-    $j(document).ready(function() {
-        $j('#cropForm').on('submit', function(event) {
+    $(document).ready(function() {
+        $('#cropForm').on('submit', function(event) {
             event.preventDefault();
 
-            if (validateForm()) {
-                $j.ajax({
-                    url: "{% url 'crop_recommendation_index' %}",
-                    method: "POST",
-                    data: $j(this).serialize(),
-                    success: function(data) {
-                        $j('#cropRecommendation').text(data.recommended_crop);
-                        $j('#resultModal').modal('show');
-                    },
-                    error: function(xhr, status, error) {
-                        alert("An error occurred: " + error);
-                    }
-                });
-            } else {
-                alert("Please fill out all required fields with valid values.");
-            }
-        });
-
-        $j('#cropForm').on('input change', function() {
-            validateForm();
+            $.ajax({
+                url: "{% url 'crop_recommendation_index' %}",
+                method: "POST",
+                data: $(this).serialize(),
+                success: function(data) {
+                    $('#cropRecommendation').text(data.recommended_crop);
+                    $('#resultModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
         });
     });
+
+
 </script>
 
-<!-- FontAwesome and Bootstrap CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-<!-- Modal HTML -->
+<!-- Modal for Recommendation Result -->
 <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -156,44 +182,7 @@
 <!-- Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-<!-- Custom Styles -->
-<style>
-    @keyframes colorChange {
-        0% { background-color: #d4edda; }
-        25% { background-color: #c3e6cb; }
-        50% { background-color: #b1dfbb; }
-        75% { background-color: #a1d6ab; }
-        100% { background-color: #d4edda; }
-    }
 
-    .form-container {
-        animation: colorChange 10s infinite;
-        transition: box-shadow 0.3s ease;
-    }
-
-    .form-container:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .form-container form {
-        transition: opacity 0.3s ease;
-    }
-
-    .form-container:hover form {
-        opacity: 0.9;
-    }
-
-    .is-invalid {
-        border-color: #dc3545;
-    }
-
-    .invalid-feedback {
-        display: block;
-        color: #dc3545;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-</style>
 
 {% include 'footer.html' %}
 {% endblock %}
