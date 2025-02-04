@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .result-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #28a745;
+            margin-bottom: 30px;
+        }
+        .result-table {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="result-container">
+                <h2>Predicted Prices</h2>
+                <table class="table table-bordered result-table">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Predicted Price</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for date, price in predictions %}
+                        <tr>
+                            <td>{{ date }}</td>
+                            <td>{{ price }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{% url 'predict_price' %}" class="btn btn-success mt-3">Predict Another</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

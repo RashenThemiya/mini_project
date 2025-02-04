@@ -1,0 +1,100 @@
+from django.shortcuts import render
+
+# Create your views here.
+from django.shortcuts import render
+from .forms import PricePredictionForm
+from .models import PricePrediction
+import pandas as pd
+from datetime import datetime
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+def train_and_predict(df, start_date, end_date, admin1, admin2, market, category, commodity, unit):
+    # Preprocess the data
+    df['date'] = pd.to_datetime(df['date'])
+    df['year'] = df['date'].dt.year
+    df['month'] = df['date'].dt.month
+    df['day'] = df['date'].dt.day
+    df = df.drop(columns=['date'])
+
+    # Select features and target
+    X = df[['admin1', 'admin2', 'market', 'category', 'commodity', 'unit', 'year', 'month', 'day']]
+    y = df['price']
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Preprocessing pipeline for categorical and numeric features
+    categorical_features = ['admin1', 'admin2', 'market', 'category', 'commodity', 'unit']
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('cat', OneHotEncoder(), categorical_features),
+            ('num', 'passthrough', ['year', 'month', 'day'])
+        ]
+    )
+
+    # Define the model pipeline
+    pipeline = Pipeline(steps=[
+        ('preprocessor', preprocessor),
+        ('model', RandomForestRegressor(n_estimators=100, random_state=42))
+    ])
+
+    # Train the model
+    pipeline.fit(X_train, y_train)
+
+    # Generate predictions for the input date range
+    date_range = pd.date_range(start=start_date, end=end_date)
+    predictions = []
+
+    for date in date_range:
+        year, month, day = date.year, date.month, date.day
+        input_features = pd.DataFrame([[admin1, admin2, market, category, commodity, unit, year, month, day]],
+                                      columns=['admin1', 'admin2', 'market', 'category', 'commodity', 'unit', 'year', 'month', 'day'])
+        predicted_price = pipeline.predict(input_features)
+        predictions.append((date.strftime('%Y-%m-%d'), predicted_price[0]))
+
+    return predictions  # Return the list of tuples (date, predicted price)
+
+def predict_price_view(request):
+    if request.method == 'POST':
+        form = PricePredictionForm(request.POST)
+        if form.is_valid():
+            admin1 = form.cleaned_data['admin1']
+            admin2 = form.cleaned_data['admin2']
+            market = form.cleaned_data['market']
+            category = form.cleaned_data['category']
+            commodity = form.cleaned_data['commodity']
+            unit = form.cleaned_data['unit']
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+
+
+            df = pd.read_csv(r'C:\Users\User\Desktop\Market Analysis\Market Analysis\food_price_prediction\price_prediction\dataset.csv')
+
+            # Get predictions for each date
+            predictions = train_and_predict(df,start_date, end_date, admin1, admin2, market, category, commodity, unit)
+
+            # Save the result in the database
+            for date, predicted_price in predictions:
+                PricePrediction.objects.create(
+                    admin1=admin1,
+                    admin2=admin2,
+                    market=market,
+                    category=category,
+                    commodity=commodity,
+                    unit=unit,
+                    start_date=date,
+                    end_date=end_date,
+                    predicted_price=predicted_price
+                )
+
+            return render(request, 'price_prediction/result.html', {'predictions': predictions})
+
+    else:
+        form = PricePredictionForm()
+
+    return render(request, 'price_prediction/predict.html', {'form': form})
+
