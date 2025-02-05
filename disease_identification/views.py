@@ -85,7 +85,7 @@ def disease_identification(request):
             prediction_probability = predictions[0][predicted_class_index] * 100
 
             # If probability is less than 75%, ask for clearer image
-            if prediction_probability < 75:
+            if prediction_probability < 50:
                 return render(request, 'upload.html', {
                     'error': 'Prediction confidence is too low. Please upload a clearer image.'
                 })
